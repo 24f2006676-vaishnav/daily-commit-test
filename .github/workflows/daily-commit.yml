@@ -1,0 +1,30 @@
+name: Daily Commit Test
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # runs daily at 07:00 UTC
+  workflow_dispatch:     # allows manual trigger
+
+jobs:
+  daily-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure Git (24f2006676@ds.study.iitm.ac.in)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "24f2006676@ds.study.iitm.ac.in"
+
+      - name: Create daily update file
+        run: |
+          echo "Daily update at $(date)" >> daily-log.txt
+
+      - name: Commit and push changes
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git add daily-log.txt
+          git commit -m "Automated daily commit [skip ci]" || echo "No changes to commit"
+          git push https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.git HEAD:main
